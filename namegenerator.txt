@@ -1,0 +1,124 @@
+import json
+import urllib
+import requests
+import random
+
+
+
+letter = input(('What is your first name? '))
+cap_letter = letter.capitalize()
+lists = list(cap_letter)
+first_letter = (lists[0])
+print('Hi '+ cap_letter + ' !')
+
+
+gletter = input(('Specify the gender of names you want: '))
+low_letter = gletter.lower()
+low_lists = list(low_letter)
+gender_letter = (low_lists[0])
+
+number_of_names = input(('How many different names would you like? '))
+num = number_of_names
+
+while True:
+    if int(number_of_names) >= 0:
+        num = number_of_names
+        break
+    else:
+        print('Oops! Please specify a number: ')
+        number_of_names = input(('How many different names would you like? '))
+
+
+starting_input = input(('What letters do you want the names to start with? '))
+input_letters = starting_input[0].upper()
+letters_list = list(input_letters)
+first_letter = (letters_list[0])
+starting_letters = input_letters
+#url_string = (f'''"Name": {{
+ #               "$gte": {starting_letters}
+ #           }},''')
+
+
+
+while True:
+
+    if gender_letter == 'f':
+        print('Female names')
+        where = urllib.parse.quote_plus(f"""
+        {{
+            "Name": {{
+                "$gte": "{starting_letters}"
+            }},
+            "Genre": "female"
+        }}
+        """)
+        url = 'https://parseapi.back4app.com/classes/Listofnames_Names_Letter_'+first_letter+'?limit=100&excludeKeys=Letter&where=%s' % where
+        break
+    elif gender_letter == 'm':
+        print('Male names')
+        where = urllib.parse.quote_plus(f"""
+        {{
+            "Name": {{
+                "$gte": "{starting_letters}"
+            }},
+            "Genre": "male"
+        }}
+        """)
+        url = 'https://parseapi.back4app.com/classes/Listofnames_Names_Letter_'+first_letter+'?limit=100&excludeKeys=Letter&where=%s' % where
+        break
+
+    else:
+        print('All '+ first_letter +' names enabled!')
+        url = 'https://parseapi.back4app.com/classes/Listofnames_Names_Letter_'+first_letter+'?limit=19000&excludeKeys=Letter'
+        break
+
+headers = {
+    'X-Parse-Application-Id': 'p7834rs6SwHX4BL35X96aXBIrWlVdfCCGf1GKWPv', # This is your app's application id
+    'X-Parse-REST-API-Key': 'ymBP4vSrCcF0E55frCEJKCQ6K38BpQb6OEQbDFMB' # This is your app's REST API key
+}
+
+r = requests.get(url, headers=headers)
+print (r.status_code)
+
+data = json.loads(requests.get(url, headers=headers).content.decode('utf-8')) # Here you have the data that you need
+#print(json.dumps(data, indent=2))
+
+def nprint(obj):
+
+    text = print(json.dumps(obj, indent=2))
+    print(text)
+
+new_names = r.json()['results']
+
+clean_names = []
+
+while True:
+    if len(starting_letters) >= 2:
+        for d in new_names:
+            name = d['Name']
+            clean_names.append(name)
+        break
+
+    else:
+        for d in new_names:
+            name = d['Name']
+            clean_names.append(name)
+            #random.shuffle(clean_names)
+        break
+
+#print(clean_names)
+user_range = range(int(num))
+print(clean_names[0: int(num)])
+
+while True:
+    shuffle_input = input(('Would you like to shuffle? '))
+    shuffle_letter = shuffle_input.lower()
+    shuffle_lists = list(shuffle_letter)
+    first_shuffle = (shuffle_lists[0])
+
+    if first_shuffle == 'y':
+        random.shuffle(clean_names)
+        print(clean_names[0: int(num)])
+
+    else:
+        break
